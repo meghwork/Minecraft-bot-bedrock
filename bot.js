@@ -6,7 +6,6 @@ const app = express();
 app.get('/', (req, res) => res.send('Bot is alive'));
 app.listen(process.env.PORT || 3000, () => console.log('Web server running'));
 
-// Minecraft Bot config
 const client = createClient({
   host: 'BeastSMP-VgeD.aternos.me',
   port: 53675,
@@ -22,21 +21,31 @@ client.on('spawn', () => {
   console.log('Bot spawn event received, will start sending player_auth_input.');
 
   setInterval(() => {
-    // Use the bot's actual position if available, otherwise a default
+    // Always use a valid position object
     let pos = { x: 0, y: 70, z: 0 };
-    if (client.entity && client.entity.position) {
+    if (
+      client.entity &&
+      client.entity.position &&
+      typeof client.entity.position.x === 'number' &&
+      typeof client.entity.position.y === 'number' &&
+      typeof client.entity.position.z === 'number'
+    ) {
       pos = client.entity.position;
     } else {
       console.log('Using default position...');
     }
+
     const yaw = Math.random() * 360;
     const pitch = Math.random() * 90 - 45;
+
+    // Always use valid move_vector as well
+    const move_vector = { x: 0, y: 0, z: 0 };
 
     client.write('player_auth_input', {
       position: pos,
       pitch: pitch,
       yaw: yaw,
-      move_vector: { x: 0, y: 0, z: 0 },
+      move_vector: move_vector,
       head_yaw: yaw,
       input_data: 0,
       input_mode: 0,
