@@ -12,6 +12,19 @@ const client = createClient({
   offline: true
 });
 
+function ensureVec3(obj, def) {
+  // Ensures object has valid x, y, z (numbers); if not, returns defaults
+  if (
+    typeof obj === 'object' &&
+    typeof obj.x === 'number' &&
+    typeof obj.y === 'number' &&
+    typeof obj.z === 'number'
+  ) {
+    return obj;
+  }
+  return def;
+}
+
 client.on('join', () => {
   console.log('Bot has joined the server');
 });
@@ -20,29 +33,13 @@ client.on('spawn', () => {
   console.log('Bot spawn event received, will start sending player_auth_input.');
 
   setInterval(() => {
-    // Always create valid position and move_vector objects
-    let pos = { x: 0, y: 70, z: 0 };
-    try {
-      if (
-        client.entity &&
-        client.entity.position &&
-        typeof client.entity.position.x === 'number' &&
-        typeof client.entity.position.y === 'number' &&
-        typeof client.entity.position.z === 'number'
-      ) {
-        pos = {
-          x: client.entity.position.x,
-          y: client.entity.position.y,
-          z: client.entity.position.z
-        };
-      }
-    } catch (e) {
-      console.log('Error reading entity position, using fallback.');
-    }
+    // Always provide valid vectors!
+    const defaultPos = { x: 0, y: 70, z: 0 };
+    const pos = ensureVec3(client.entity && client.entity.position, defaultPos);
+    const move_vector = { x: 0, y: 0, z: 0 };
 
     const yaw = Math.random() * 360;
     const pitch = Math.random() * 90 - 45;
-    const move_vector = { x: 0, y: 0, z: 0 };
 
     try {
       client.write('player_auth_input', {
