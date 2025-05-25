@@ -13,7 +13,6 @@ const client = createClient({
 });
 
 function ensureVec3(obj, def) {
-  // Ensures object has valid x, y, z (numbers); if not, returns defaults
   if (
     typeof obj === 'object' &&
     typeof obj.x === 'number' &&
@@ -30,33 +29,25 @@ client.on('join', () => {
 });
 
 client.on('spawn', () => {
-  console.log('Bot spawn event received, will start sending player_auth_input.');
-
+  console.log('Bot spawn event received, will start sending player_move.');
   setInterval(() => {
-    // Always provide valid vectors!
     const defaultPos = { x: 0, y: 70, z: 0 };
     const pos = ensureVec3(client.entity && client.entity.position, defaultPos);
-    const move_vector = { x: 0, y: 0, z: 0 };
 
     const yaw = Math.random() * 360;
     const pitch = Math.random() * 90 - 45;
 
     try {
-      client.write('player_auth_input', {
+      client.write('player_move', {
         position: pos,
-        pitch: pitch,
-        yaw: yaw,
-        move_vector: move_vector,
-        head_yaw: yaw,
-        input_data: 0,
-        input_mode: 0,
-        play_mode: 0,
+        rotation: { x: pitch, y: yaw, z: 0 },
+        mode: 0,
         on_ground: true,
         tick: BigInt(Date.now())
       });
-      console.log('Bot sent player_auth_input:', pos);
+      console.log('Bot made a small move:', pos);
     } catch (err) {
-      console.log('Failed to send player_auth_input:', err);
+      console.log('Failed to send player_move:', err);
     }
   }, 10000); // every 10 seconds
 });
